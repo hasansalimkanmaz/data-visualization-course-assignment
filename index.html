@@ -28,18 +28,18 @@
   },
 
   "data": [
-    {
-      "name": "table",
-      "url": "./datasets/df_abt.csv",
-      "format": {"type": "csv"}
-    },
-    {
-    "name": "table-clean",
-    "source": "table",
-    "transform": [
-      {"type": "filter", "expr": "datum.Happiness < 11 && datum.trstprl < 11"}
-    ]
-    },
+    // {
+    //   "name": "table",
+    //   "url": "./datasets/df_abt.csv",
+    //   "format": {"type": "csv"}
+    // },
+    // {
+    // "name": "table-clean",
+    // "source": "table",
+    // "transform": [
+    //   {"type": "filter", "expr": "datum.Happiness < 11 && datum.trstprl < 11"}
+    // ]
+    // },
     {
     "name": "table-counts",
     "url": "./datasets/happiness_trstprl_count.csv",
