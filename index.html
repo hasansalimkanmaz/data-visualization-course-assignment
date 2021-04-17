@@ -26,25 +26,35 @@
     "frame": "group",
     "offset": 40
   },
-
+  "signals": [
+  {
+      "name": "symbol_shape", "value": "diamond",
+      "bind": {"input": "radio", "options": ["circle", "diamond"]}
+    },
+  ],
   "data": [
-    // {
-    //   "name": "table",
-    //   "url": "./datasets/df_abt.csv",
-    //   "format": {"type": "csv"}
-    // },
-    // {
-    // "name": "table-clean",
-    // "source": "table",
-    // "transform": [
-    //   {"type": "filter", "expr": "datum.Happiness < 11 && datum.trstprl < 11"}
-    // ]
-    // },
     {
-    "name": "table-counts",
-    "url": "./datasets/happiness_trstprl_count.csv",
-    "format": {"type": "csv"}
+      "name": "table",
+      "url": "./datasets/df_abt.csv",
+      "format": {"type": "csv"}
+    },
+    {
+    "name": "table-clean",
+    "source": "table",
+    "transform": [
+      {"type": "filter", "expr": "datum.Happiness < 11 && datum.trstprl < 11"}
+    ]
+    },
+    {
+    "name": "trstprl",
+    "source": "table-clean",
+    "transform": [
+      {"type": "aggregate", 
+      "ops": ["count"],
+      "groupby": ["Happiness", "trstprl"],
     }
+    ]
+    },
   ],
 
   "scales": [
@@ -60,60 +70,38 @@
     }
   ],
   "axes": [
-  {"orient": "bottom", "scale": "xscale", "title": "Happiness", "labelPadding": 20, "labelFontSize": 20, "titleFontSize": 20},
-  {"orient": "left", "scale": "yscale", "title": "trstprl", "labelPadding": 20, "labelFontSize": 20, "titleFontSize": 20}
+  {"orient": "bottom", "scale": "xscale", "title": "Happiness", 
+  "labelPadding": 30, "labelFontSize": 20, "titleFontSize": 20, "titlePadding": 40},
+  {"orient": "left", "scale": "yscale", "title": "trstprl", 
+  "labelPadding": 30, "labelFontSize": 20, "titleFontSize": 20, "titlePadding": 40}
   ],
-//   "legends": [
-//   {
-//     "fill": "color",
-//     "encode": {
-//       "title": {
-//         "update": {
-//           "fontSize": {"value": 14}
-//         }
-//       },
-//       "labels": {
-//         "interactive": true,
-//         "update": {
-//           "fontSize": {"value": 12},
-//           "fill": {"value": "black"}
-//         },
-//         "hover": {
-//           "fill": {"value": "firebrick"}
-//         }
-//       },
-//       "symbols": {
-//         "update": {
-//           "stroke": {"value": "transparent"}
-//         }
-//       },
-//       "legend": {
-//         "update": {
-//           "stroke": {"value": "#ccc"},
-//           "strokeWidth": {"value": 1.5}
-//         }
-//       }
-//     }
-//   }
-// ],
+
   "marks": [
     {
       "type": "symbol",
-      "from": {"data":"table-counts"},
+      "from": {"data":"trstprl"},
       "encode": {
         "enter": {
           "fill": {"value": "#939597"},
-          "size": {"field": "value"}, // "datum.value", 
+          "size": {"field": "count"},
           "x": {"scale": "xscale", "field": "Happiness"},
           "y": {"scale": "yscale", "field": "trstprl"},
+          "shape": {"signal": "symbol_shape"},
 
+        },
+        "update": {
+          "shape": {"signal": "symbol_shape"},
         }
       }      
     }
   ]
 };
-
+      
       vegaEmbed('#vis', yourVlSpec);
+      
+      var view = new vega.View(vega.parse(yourVlSpec));
+      view.runAsync(); // evaluate and render the view
+
     </script>
   </body>
 </html>
