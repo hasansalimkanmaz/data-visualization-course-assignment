@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> First Visual Designs</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.19.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.15.1"></script>
+
+  </head>
+  <body>
+    <div id="vis"></div>
+
+    <script type="text/javascript">
+      var yourVlSpec = {
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 1000,
+  "height": 500,
+  "padding": 100,
+  "title": {
+    "text": "Does well-being affect trust?",
+    "anchor": "middle",
+    "fontSize": 25,
+    "frame": "group",
+    "offset": 40
+  },
+
+  "data": [
+    {
+      "name": "table",
+      "url": "./datasets/df_abt.csv",
+      "format": {"type": "csv"}
+    },
+    {
+    "name": "table-clean",
+    "source": "table",
+    "transform": [
+      {"type": "filter", "expr": "datum.Happiness < 11 && datum.trstprl < 11"}
+    ]
+    },
+    {
+    "name": "table-counts",
+    "url": "./datasets/happiness_trstprl_count.csv",
+    "format": {"type": "csv"}
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "xscale",
+      "domain": [0, 10],
+      "range": [0,1000]
+    },
+    {
+      "name": "yscale",
+      "domain": [0, 10],
+      "range": "height"
+    }
+  ],
+  "axes": [
+  {"orient": "bottom", "scale": "xscale", "title": "Happiness", "labelPadding": 20, "labelFontSize": 20, "titleFontSize": 20},
+  {"orient": "left", "scale": "yscale", "title": "trstprl", "labelPadding": 20, "labelFontSize": 20, "titleFontSize": 20}
+  ],
+//   "legends": [
+//   {
+//     "fill": "color",
+//     "encode": {
+//       "title": {
+//         "update": {
+//           "fontSize": {"value": 14}
+//         }
+//       },
+//       "labels": {
+//         "interactive": true,
+//         "update": {
+//           "fontSize": {"value": 12},
+//           "fill": {"value": "black"}
+//         },
+//         "hover": {
+//           "fill": {"value": "firebrick"}
+//         }
+//       },
+//       "symbols": {
+//         "update": {
+//           "stroke": {"value": "transparent"}
+//         }
+//       },
+//       "legend": {
+//         "update": {
+//           "stroke": {"value": "#ccc"},
+//           "strokeWidth": {"value": 1.5}
+//         }
+//       }
+//     }
+//   }
+// ],
+  "marks": [
+    {
+      "type": "symbol",
+      "from": {"data":"table-counts"},
+      "encode": {
+        "enter": {
+          "fill": {"value": "#939597"},
+          "size": {"field": "value"}, // "datum.value", 
+          "x": {"scale": "xscale", "field": "Happiness"},
+          "y": {"scale": "yscale", "field": "trstprl"},
+
+        }
+      }      
+    }
+  ]
+};
+
+      vegaEmbed('#vis', yourVlSpec);
+    </script>
+  </body>
+</html>
