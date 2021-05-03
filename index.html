@@ -500,7 +500,7 @@
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   "description": "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables.",
   "width": 700,
-  "height": 500,
+  "height": 700,
   "padding": 0,
   "autosize": "none",
 
@@ -510,9 +510,9 @@
     { "name": "nodeRadius", "value": 8,
       "bind": {"input": "range", "min": 1, "max": 50, "step": 1} },
     { "name": "nodeCharge", "value": -30,
-      "bind": {"input": "range", "min":-100, "max": 10, "step": 1} },
+      "bind": {"input": "range", "min":-100, "max": 100, "step": 1} },
     { "name": "linkDistance", "value": 30,
-      "bind": {"input": "range", "min": 5, "max": 100, "step": 1} },
+      "bind": {"input": "range", "min": 5, "max": 300, "step": 1} },
     { "name": "static", "value": true,
       "bind": {"input": "checkbox"} },
     {
@@ -556,16 +556,15 @@
   "data": [
     {
       "name": "node-data",
-      "url": "network_plot_trst_vs_happiness.json",
+      "url": "network_plot_trst_to_only_trstprl.json",
       "format": {"type": "json", "property": "nodes"}
     },
     {
       "name": "link-data",
-      "url": "network_plot_trst_vs_happiness.json",
+      "url": "network_plot_trst_to_only_trstprl.json",
       "format": {"type": "json", "property": "links"}
     }
   ],
-
   "scales": [
     {
       "name": "color",
@@ -628,7 +627,7 @@
       "encode": {
         "update": {
           "stroke": {"value": "#ccc"},
-          "strokeWidth": {"value": 0.1}
+          "strokeWidth": {"value": 0.5}
         }
       },
       "transform": [
@@ -643,39 +642,18 @@
     },
     {
       "type": "text",
-      "from": {"data": "node-data"},
+      "from": {"data": "nodes"},
       "encode": {
-        "enter": {
+        "update": {
+          "x": {"field": "x", "offset": 4},
+          "y": {"field": "y"},
           "text": {"field": "datum.name"},
-          "fontSize": {"value": 80}
-        }
-      },
-      "transform": [
-        {
-          "type": "label",
-          // "avoidMarks": ["trend"],
-          "anchor": ["top", "bottom", "right", "left"],
-          "offset": [1],
-          "size": [10,10]
-        }
-      ]
-    }
-  ],
-  "legends": [
-    {
-      "fill": "color",
-      "title": "Features",
-      "padding": 4,
-      "encode": {
-        "symbols": {
-          "enter": {
-            "strokeWidth": {"value": 20},
-            "size": {"value": 50}
-          }
+          "fontSize": {"value": 10}
         }
       }
     }
-  ]
+  ],
+
 }
 
       vegaEmbed('#vis', yourVlSpec);
