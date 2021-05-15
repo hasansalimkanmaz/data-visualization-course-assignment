@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Happiness by country",
+  "width": 700,
+  "height": 700,
+  "layer": [
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/world-110m.json",
+        "format": {
+          "type": "topojson",
+          "feature": "countries"
+        }
+      },
+      "projection": {
+        "type": "azimuthalEqualArea",
+        "rotate": [-28, -55, 2],
+        "scale": 642
+      },
+      "mark": {
+        "type": "geoshape",
+        "fill": "lightgray",
+        "stroke": "white"
+      }
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/country_happiness.csv"
+      },
+      "projection": {
+        "type": "azimuthalEqualArea",
+        "rotate": [-28, -55, 2],
+        "scale": 642
+      },
+      "mark": {"type": "point",
+              "strokeWidth": 5},
+      "encoding": {
+        "longitude": {
+          "field": "longitude",
+          "type": "quantitative"
+        },
+        "latitude": {
+          "field": "latitude",
+          "type": "quantitative"
+        },
+        "size": {"value": 350},
+        "color":{
+          "field": "happy",
+          "type": "quantitative",
+          "title": "Average happiness",
+          "scale": {"scheme": "redblue"}          
+        },
+        "tooltip": [{"field": "happy",
+                      "type": "quantitative",
+                      "title": "Happiness"}]
+      }
+    }
+  ]
+ }
+

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Percentage of values by each trust aspect",
+  "width": 600,
+  "height": 800,
+  "data": {"url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/trust_aspects.csv"},
+
+  "transform": [
+    {
+      "calculate": "if(datum.Values === '0', 0,if(datum.Values === '1', 1,if(datum.Values === '2', 2,if(datum.Values === '3', 3,if(datum.Values === '4', 4,if(datum.Values === '5', 5,if(datum.Values === '6', 6,if(datum.Values === '7', 7,if(datum.Values === '8', 8,if(datum.Values === '9', 9, 10))))))))))",
+      "as": "ValuesOrder"
+    }
+  ],
+
+  "mark": "bar",
+  "encoding": {
+    "x": {"aggregate": "count",
+            "field": "Values",            
+            "title": "Percentage of values",
+            "axis": null,
+            "stack": "normalize"},
+    "y": {"field": "Trust",
+            "title": "Trust aspect",
+            "sort": "x"},
+    "tooltip": [{"field": "Values",
+                "type": "nominal",
+                "title": "Value"},
+                {"aggregate": "count",
+                    "field": "Values",
+                    "type": "quantitative",
+                    "title": "Number of values"}],
+    "color": {"field": "Values",
+                "type": "ordinal",
+                "sort": {"field": "ValuesOrder"},
+                "scale": {"scheme": "category20b"}},
+    "order": {"field": "ValuesOrder"} 
+    }
+ }
+
