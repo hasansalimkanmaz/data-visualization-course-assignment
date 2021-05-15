@@ -4,7 +4,7 @@
 <head>
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
   <meta content="utf-8" http-equiv="encoding">
-  <title> First Visual Designs</title>
+  <title>WHW Data Visualization Project</title>
 
   <script src="https://cdn.jsdelivr.net/npm/vega@5.19.1"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
@@ -13,677 +13,26 @@
 </head>
 
 <body>
-  <div id="vis"></div>
-  <!-- Initial Scatter Plot -->
-  <!-- <script type="text/javascript">
-      var yourVlSpec = {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "width": 1000,
-  "height": 500,
-  "padding": 100,
-  "title": {
-    "text": "Does well-being affect trust?",
-    "anchor": "middle",
-    "fontSize": 25,
-    "frame": "group",
-    "offset": 40
-  },
-  "signals": [
-  {
-      "name": "symbol_shape", "value": "circle",
-      "bind": {"input": "radio", "options": ["circle", "diamond"]}
-    },
-  ],
-  "data": [
-    {
-      "name": "table",
-      "url": "./datasets/df_abt.csv",
-      "format": {"type": "csv"}
-    },
-    {
-    "name": "table-clean",
-    "source": "table",
-    "transform": [
-      {"type": "filter", "expr": "datum.Happiness < 11 && datum.trstprl < 11"}
-    ]
-    },
-    {
-    "name": "trstprl",
-    "source": "table-clean",
-    "transform": [
-      {"type": "aggregate", 
-      "ops": ["count"],
-      "groupby": ["Happiness", "trstprl"],
-    }
-    ]
-    },
-  ],
-
-  "scales": [
-    {
-      "name": "xscale",
-      "domain": [0, 10],
-      "range": [0,1000]
-    },
-    {
-      "name": "yscale",
-      "domain": [0, 10],
-      "range": "height"
-    }
-  ],
-  "axes": [
-  {"orient": "bottom", "scale": "xscale", "title": "Happiness", 
-  "labelPadding": 30, "labelFontSize": 20, "titleFontSize": 20, "titlePadding": 40},
-  {"orient": "left", "scale": "yscale", "title": "Trust in country's parliament", 
-  "labelPadding": 30, "labelFontSize": 20, "titleFontSize": 20, "titlePadding": 40}
-  ],
-
-  "marks": [
-    {
-      "type": "symbol",
-      "from": {"data":"trstprl"},
-      "encode": {
-        "enter": {
-          "fill": {"value": "#ff0000"},
-          "size": {"field": "count"},
-          "x": {"scale": "xscale", "field": "Happiness"},
-          "y": {"scale": "yscale", "field": "trstprl"},
-          "shape": {"signal": "symbol_shape"},
-
-        },
-        "update": {
-          "shape": {"signal": "symbol_shape"},
-        }
-      }      
-    }
-  ]
-};
-      
-      vegaEmbed('#vis', yourVlSpec);
-      
-      var view = new vega.View(vega.parse(yourVlSpec));
-      view.runAsync(); // evaluate and render the view
-
-    </script> -->
-
-  <!-- Initial Scatter Plot -->
-
-  <!-- <script type="text/javascript">
-      var yourVlSpec = {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A network diagram of software dependencies, with edges grouped via hierarchical edge bundling.",
-  "padding": 5,
-  "width": 720,
-  "height": 720,
-  "autosize": "none",
-
-  "signals": [
-    {
-      "name": "tension", "value": 0.85,
-      "bind": {"input": "range", "min": 0, "max": 1, "step": 0.01}
-    },
-    {
-      "name": "radius", "value": 280,
-      "bind": {"input": "range", "min": 20, "max": 400}
-    },
-    {
-      "name": "extent", "value": 360,
-      "bind": {"input": "range", "min": 0, "max": 360, "step": 1}
-    },
-    {
-      "name": "rotate", "value": 0,
-      "bind": {"input": "range", "min": 0, "max": 360, "step": 1}
-    },
-    {
-      "name": "textSize", "value": 8,
-      "bind": {"input": "range", "min": 2, "max": 20, "step": 1}
-    },
-    {
-      "name": "textOffset", "value": 2,
-      "bind": {"input": "range", "min": 0, "max": 10, "step": 1}
-    },
-    {
-      "name": "layout", "value": "cluster",
-      "bind": {"input": "radio", "options": ["tidy", "cluster"]}
-    },
-    { "name": "colorIn", "value": "firebrick" },
-    { "name": "colorOut", "value": "forestgreen" },
-    { "name": "originX", "update": "width / 2" },
-    { "name": "originY", "update": "height / 2" },
-    {
-      "name": "active", "value": null,
-      "on": [
-        { "events": "text:mouseover", "update": "datum.id" },
-        { "events": "mouseover[!event.item]", "update": "null" }
-      ]
-    }
-  ],
-
-  "data": [
-    {
-      "name": "tree",
-      "url": "data/flare.json",
-      "transform": [
-        {
-          "type": "stratify",
-          "key": "id",
-          "parentKey": "parent"
-        },
-        {
-          "type": "tree",
-          "method": {"signal": "layout"},
-          "size": [1, 1],
-          "as": ["alpha", "beta", "depth", "children"]
-        },
-        {
-          "type": "formula",
-          "expr": "(rotate + extent * datum.alpha + 270) % 360",
-          "as":   "angle"
-        },
-        {
-          "type": "formula",
-          "expr": "inrange(datum.angle, [90, 270])",
-          "as":   "leftside"
-        },
-        {
-          "type": "formula",
-          "expr": "originX + radius * datum.beta * cos(PI * datum.angle / 180)",
-          "as":   "x"
-        },
-        {
-          "type": "formula",
-          "expr": "originY + radius * datum.beta * sin(PI * datum.angle / 180)",
-          "as":   "y"
-        }
-      ]
-    },
-    {
-      "name": "leaves",
-      "source": "tree",
-      "transform": [
-        {
-          "type": "filter",
-          "expr": "!datum.children"
-        }
-      ]
-    },
-    {
-      "name": "dependencies",
-      "url": "data/flare-dependencies.json",
-      "transform": [
-        {
-          "type": "formula",
-          "expr": "treePath('tree', datum.source, datum.target)",
-          "as":   "treepath",
-          "initonly": true
-        }
-      ]
-    },
-    {
-      "name": "selected",
-      "source": "dependencies",
-      "transform": [
-        {
-          "type": "filter",
-          "expr": "datum.source === active || datum.target === active"
-        }
-      ]
-    }
-  ],
-
-  "marks": [
-    {
-      "type": "text",
-      "from": {"data": "leaves"},
-      "encode": {
-        "enter": {
-          "text": {"field": "name"},
-          "baseline": {"value": "middle"}
-        },
-        "update": {
-          "x": {"field": "x"},
-          "y": {"field": "y"},
-          "dx": {"signal": "textOffset * (datum.leftside ? -1 : 1)"},
-          "angle": {"signal": "datum.leftside ? datum.angle - 180 : datum.angle"},
-          "align": {"signal": "datum.leftside ? 'right' : 'left'"},
-          "fontSize": {"signal": "textSize"},
-          "fontWeight": [
-            {"test": "indata('selected', 'source', datum.id)", "value": "bold"},
-            {"test": "indata('selected', 'target', datum.id)", "value": "bold"},
-            {"value": null}
-          ],
-          "fill": [
-            {"test": "datum.id === active", "value": "black"},
-            {"test": "indata('selected', 'source', datum.id)", "signal": "colorIn"},
-            {"test": "indata('selected', 'target', datum.id)", "signal": "colorOut"},
-            {"value": "black"}
-          ]
-        }
-      }
-    },
-    {
-      "type": "group",
-      "from": {
-        "facet": {
-          "name":  "path",
-          "data":  "dependencies",
-          "field": "treepath"
-        }
-      },
-      "marks": [
-        {
-          "type": "line",
-          "interactive": false,
-          "from": {"data": "path"},
-          "encode": {
-            "enter": {
-              "interpolate": {"value": "bundle"},
-              "strokeWidth": {"value": 1.5}
-            },
-            "update": {
-              "stroke": [
-                {"test": "parent.source === active", "signal": "colorOut"},
-                {"test": "parent.target === active", "signal": "colorIn"},
-                {"value": "steelblue"}
-              ],
-              "strokeOpacity": [
-                {"test": "parent.source === active || parent.target === active", "value": 1},
-                {"value": 0.2}
-              ],
-              "tension": {"signal": "tension"},
-              "x": {"field": "x"},
-              "y": {"field": "y"}
-            }
-          }
-        }
-      ]
-    }
-  ],
-
-  "scales": [
-    {
-      "name": "color",
-      "type": "ordinal",
-      "domain": ["depends on", "imported by"],
-      "range": [{"signal": "colorIn"}, {"signal": "colorOut"}]
-    }
-  ],
-
-  "legends": [
-    {
-      "stroke": "color",
-      "orient": "bottom-right",
-      "title": "Dependencies",
-      "symbolType": "stroke"
-    }
-  ]
-}
-;
-      
-      vegaEmbed('#vis', yourVlSpec);
-      
-      var view = new vega.View(vega.parse(yourVlSpec));
-      view.runAsync(); // evaluate and render the view
-
-    </script> -->
-
-  <!-- Initial Arc Plot -->
-
-  <!-- <script type="text/javascript">
-      var yourVlSpec = {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
-  "width": 1200,
-  "padding": 50,
-  "signals": [
-  {
-      "name": "active", "value": "null",
-      "on": [
-        { "events": "text:mouseover", "update": "datum.index"},
-        { "events": "mouseover[!event.item]", "update": "null" }
-      ]
-    }
-      ],
-  "data": [
-    {
-      "name": "edges",
-      "url": "arc_plot_trst_vs_happiness.json",
-      "format": {"type": "json", "property": "links"}
-    },
-    {
-      "name": "sourceDegree",
-      "source": "edges",
-      "transform": [
-        {"type": "aggregate", "groupby": ["source"]}
-      ]
-    },
-    {
-      "name": "targetDegree",
-      "source": "edges",
-      "transform": [
-        {"type": "aggregate", "groupby": ["target"]}
-      ]
-    },
-    {
-      "name": "nodes",
-      "url": "arc_plot_trst_vs_happiness.json",
-
-      "format": {"type": "json", "property": "nodes"},
-      "transform": [
-        { "type": "window", "ops": ["rank"], "as": ["order"] },
-        {
-          "type": "lookup", "from": "sourceDegree", "key": "source",
-          "fields": ["index"], "as": ["sourceDegree"],
-          "default": {"count": 0}
-        },
-        {
-          "type": "lookup", "from": "targetDegree", "key": "target",
-          "fields": ["index"], "as": ["targetDegree"],
-          "default": {"count": 0}
-        },
-        {
-          "type": "formula", "as": "degree",
-          "expr": "datum.sourceDegree.count + datum.targetDegree.count"
-        }
-      ]
-    }
-  ],
-
-  "scales": [
-    {
-      "name": "position",
-      "type": "band",
-      "domain": {"data": "nodes", "field": "order", "sort": true},
-      "range": "width"
-    },
-    {
-      "name": "color",
-      "type": "ordinal",
-      "range": "category",
-      "domain": {"data": "nodes", "field": "group"}
-    }
-  ],
-  "axes": [
-        {
-          "scale": "position",
-          "orient": "bottom",
-          "title": "x",
-          "labelFlush": true,
-          "labelOverlap": true,
-          "zindex": 1
-        }]
-  ,
-  "marks": [
-    {
-      "type": "symbol",
-      "name": "layout",
-      "interactive": false,
-      "from": {"data": "nodes"},
-      "encode": {
-        "enter": {
-          "opacity": {"value": 0}
-        },
-        "update": {
-          "x": {"scale": "position", "field": "order"},
-          "y": {"value": 0},
-          "size": {"field": "degree", "mult": 5, "offset": 10},
-          "fill": {"scale": "color", "field": "group"}
-        }
-      }
-    },
-    {
-      "type": "path",
-      "from": {"data": "edges"},
-      "encode": {
-        "enter": {
-          "stroke": {"value": "#000"},
-          "strokeOpacity": {"value": 0.2},
-          "strokeWidth": {"field": "value"}        },
-        "update": {
-          "stroke": [
-            {"test": "datum.source === active", "value": "red"},
-            {"value": "steelblue"}
-          ],
-        }
-      },
-      "transform": [
-        {
-          "type": "lookup", "from": "layout", "key": "datum.index",
-          "fields": ["datum.source", "datum.target"],
-          "as": ["sourceNode", "targetNode"]
-        },
-        {
-          "type": "linkpath",
-          "sourceX": {"expr": "min(datum.sourceNode.x, datum.targetNode.x)"},
-          "targetX": {"expr": "max(datum.sourceNode.x, datum.targetNode.x)"},
-          "sourceY": {"expr": "0"},
-          "targetY": {"expr": "0"},
-          "shape": "arc"
-        }
-      ]
-    },
-    {
-      "type": "symbol",
-      "from": {"data": "layout"},
-      "encode": {
-        "enter": {
-          "x": {"field": "x"},
-          "y": {"field": "y"},
-          "fill": {"field": "fill"},
-          "size": {"field": "size"}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "nodes"},
-      "encode": {
-        "enter": {
-          "x": {"scale": "position", "field": "order"},
-          "y": {"value": 7},
-          "fontSize": {"value": 20},
-          "align": {"value": "right"},
-          "baseline": {"value": "middle"},
-          "angle": {"value": -90},
-          "text": {"field": "name"}
-        },
-        "update": {
-          "fontSize": {"value": 20},
-        }
-      }
-    }
-  ]
-
-}
-
-      
-      vegaEmbed('#vis', yourVlSpec);
-      
-      var view = new vega.View(vega.parse(yourVlSpec));
-      view.runAsync(); // evaluate and render the view
-
-    </script> -->
-
-  <!-- Initial Arc Plot -->
-
-  <!-- Initial Network Plot -->
-
-  <!-- <script type="text/javascript">
-      var yourVlSpec = {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables.",
-  "width": 700,
-  "height": 700,
-  "padding": 0,
-  "autosize": "none",
-
-  "signals": [
-    { "name": "cx", "update": "width / 2" },
-    { "name": "cy", "update": "height / 2" },
-    { "name": "nodeRadius", "value": 8,
-      "bind": {"input": "range", "min": 1, "max": 50, "step": 1} },
-    { "name": "nodeCharge", "value": -30,
-      "bind": {"input": "range", "min":-100, "max": 100, "step": 1} },
-    { "name": "linkDistance", "value": 30,
-      "bind": {"input": "range", "min": 5, "max": 300, "step": 1} },
-    { "name": "static", "value": true,
-      "bind": {"input": "checkbox"} },
-    {
-      "description": "State variable for active node fix status.",
-      "name": "fix", "value": false,
-      "on": [
-        {
-          "events": "symbol:mouseout[!event.buttons], window:mouseup",
-          "update": "false"
-        },
-        {
-          "events": "symbol:mouseover",
-          "update": "fix || true"
-        },
-        {
-          "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
-          "update": "xy()",
-          "force": true
-        }
-      ]
-    },
-    {
-      "description": "Graph node most recently interacted with.",
-      "name": "node", "value": null,
-      "on": [
-        {
-          "events": "symbol:mouseover",
-          "update": "fix === true ? item() : node"
-        }
-      ]
-    },
-    {
-      "description": "Flag to restart Force simulation upon data changes.",
-      "name": "restart", "value": false,
-      "on": [
-        {"events": {"signal": "fix"}, "update": "fix && fix.length"}
-      ]
-    }
-  ],
-
-  "data": [
-    {
-      "name": "node-data",
-      "url": "network_plot_trst_to_only_trstprl.json",
-      "format": {"type": "json", "property": "nodes"}
-    },
-    {
-      "name": "link-data",
-      "url": "network_plot_trst_to_only_trstprl.json",
-      "format": {"type": "json", "property": "links"}
-    }
-  ],
-  "scales": [
-    {
-      "name": "color",
-      "type": "ordinal",
-      "domain": {"data": "node-data", "field": "group"},
-      "range": {"scheme": "category20c"}
-    }
-  ],
-
-  "marks": [
-    {
-      "name": "nodes",
-      "type": "symbol",
-      "zindex": 1,
-
-      "from": {"data": "node-data"},
-      "on": [
-        {
-          "trigger": "fix",
-          "modify": "node",
-          "values": "fix === true ? {fx: node.x, fy: node.y} : {fx: fix[0], fy: fix[1]}"
-        },
-        {
-          "trigger": "!fix",
-          "modify": "node", "values": "{fx: null, fy: null}"
-        }
-      ],
-
-      "encode": {
-        "enter": {
-          "fill": {"scale": "color", "field": "group"},
-          "stroke": {"value": "white"}
-        },
-        "update": {
-          "size": {"signal": "2 * nodeRadius * nodeRadius"},
-          "cursor": {"value": "pointer"}
-        }
-      },
-
-      "transform": [
-        {
-          "type": "force",
-          "iterations": 300,
-          "restart": {"signal": "restart"},
-          "static": {"signal": "static"},
-          "signal": "force",
-          "forces": [
-            {"force": "center", "x": {"signal": "cx"}, "y": {"signal": "cy"}},
-            {"force": "collide", "radius": {"signal": "nodeRadius"}},
-            {"force": "nbody", "strength": {"signal": "nodeCharge"}},
-            {"force": "link", "links": "link-data", "distance": {"signal": "linkDistance"}}
-          ]
-        }
-      ]
-    },
-    {
-      "type": "path",
-      "from": {"data": "link-data"},
-      "interactive": false,
-      "encode": {
-        "update": {
-          "stroke": {"value": "#ccc"},
-          "strokeWidth": {"value": 0.5}
-        }
-      },
-      "transform": [
-        {
-          "type": "linkpath",
-          "require": {"signal": "force"},
-          "shape": "line",
-          "sourceX": "datum.source.x", "sourceY": "datum.source.y",
-          "targetX": "datum.target.x", "targetY": "datum.target.y"
-        }
-      ]
-    },
-    {
-      "type": "text",
-      "from": {"data": "nodes"},
-      "encode": {
-        "update": {
-          "x": {"field": "x", "offset": 4},
-          "y": {"field": "y"},
-          "text": {"field": "datum.name"},
-          "fontSize": {"value": 10}
-        }
-      }
-    }
-  ],
-
-}
-
-      vegaEmbed('#vis', yourVlSpec);
-      
-      var view = new vega.View(vega.parse(yourVlSpec));
-      view.runAsync(); // evaluate and render the view
-
-    </script> -->
-
-  <!-- Initial biplot -->
-
+  <div id="description">
+    <h2>Abbreviations of Trust Features</h2>
+    <ul>
+      <li><b>trstprl:</b> Trust in country's parliament</li>
+      <li><b>trstlgl:</b> Trust in the legal system</li>
+      <li><b>trstplc:</b> Trust in the police</li>
+      <li><b>trstplt:</b> Trust in politicians</li>
+      <li><b>trstprt:</b> Trust in political parties</li>
+      <li><b>trstep:</b> Trust in the European Parliament</li>
+      <li><b>trstun:</b> Trust in the United Nations</li>
+    </ul> 
+  </div>
+  <div id="vis">
+  </div>
   <script type="text/javascript">
     var yourVlSpec = {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
   "width": 1200,
-  "height": 1200,
+  "height": 600,
   "padding": 10,
   "signals": [
     {
@@ -703,7 +52,7 @@
     },
     {
       "name": "nodeCharge",
-      "value": -30,
+      "value": 80,
       "bind": {"input": "range", "min": -100, "max": 100, "step": 1}
     },
     {
@@ -753,12 +102,26 @@
     {
       "name": "sourceDegree",
       "source": "edges",
-      "transform": [{"type": "aggregate", "groupby": ["source"]}]
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["source"],
+          "fields": ["value"],
+          "ops": ["sum"]
+        }
+      ]
     },
     {
       "name": "targetDegree",
       "source": "edges",
-      "transform": [{"type": "aggregate", "groupby": ["target"]}]
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["target"],
+          "fields": ["value"],
+          "ops": ["sum"]
+        }
+      ]
     },
     {
       "name": "nodes",
@@ -784,8 +147,13 @@
         },
         {
           "type": "formula",
-          "as": "degree",
-          "expr": "datum.sourceDegree.count + datum.targetDegree.count"
+          "as": "sourceScore",
+          "expr": "datum.sourceDegree.sum_value"
+        },
+        {
+          "type": "formula",
+          "as": "targetScore",
+          "expr": "datum.targetDegree.sum_value * 0.5"
         }
       ]
     },
@@ -820,18 +188,17 @@
       "range": {"scheme": "category20c"}
     }
   ],
-  "layout": {
-    "padding": 200,
-    "bounds": "flush",
-    "align": "none",
-    "columns": 1
-  },
+  "layout": {"padding": 200, "bounds": "flush", "align": "none", "columns": 1},
   "marks": [
     {
       "type": "group",
       "style": "cell",
-      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 600}}},
-      "title": {"text": "Arc Plot", "frame": "group"},
+      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 400}}},
+      "title": {
+        "text": "Arc Plot",
+        "frame": "group",
+        "fontSize": {"value": 20}
+      },
       "marks": [
         {
           "type": "symbol",
@@ -842,8 +209,11 @@
             "enter": {"opacity": {"value": 0}},
             "update": {
               "x": {"scale": "position", "field": "order"},
-              "y": {"value": 600},
-              "size": {"field": "degree", "mult": 5, "offset": 10},
+              "y": {"value": 400},
+              "size": [
+                {"test": "datum.group === 4", "field": "targetScore"},
+                {"field": "sourceScore", "mult": 5, "offset": 0}
+              ],
               "fill": {"scale": "color", "field": "group"}
             }
           }
@@ -861,6 +231,10 @@
               "stroke": [
                 {"test": "datum.source === active", "value": "red"},
                 {"value": "steelblue"}
+              ],
+              "zindex": [
+                {"test": "datum.source === active", "value": 2},
+                {"value": 1}
               ]
             }
           },
@@ -880,8 +254,8 @@
               "targetX": {
                 "expr": "max(datum.sourceNode.x, datum.targetNode.x)"
               },
-              "sourceY": {"expr": "600"},
-              "targetY": {"expr": "600"},
+              "sourceY": {"expr": "400"},
+              "targetY": {"expr": "400"},
               "shape": "arc"
             }
           ]
@@ -904,14 +278,14 @@
           "encode": {
             "enter": {
               "x": {"scale": "position", "field": "order"},
-              "y": {"value": 600},
+              "y": {"value": 415},
               "fontSize": {"value": 20},
               "align": {"value": "right"},
               "baseline": {"value": "middle"},
               "angle": {"value": -90},
               "text": {"field": "name"}
             },
-            "update": {"fontSize": {"value": 20}}
+            "update": {"fontSize": {"value": 15}}
           }
         }
       ]
@@ -919,19 +293,19 @@
     {
       "type": "group",
       "style": "cell",
-      
-      "encode": {"enter": 
-      {
-      "width": {"value": 120}, 
-      "height": {"value": 150}
-      }},
-      "title": {"text": "Network plot", "frame": "group"},
+      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 600}}},
+      "title": {
+        "text": "Network plot",
+        "frame": "group",
+        "fontSize": {"value": 20}
+      },
       "marks": [
         {
           "name": "nodes",
           "type": "symbol",
           "zindex": 1,
           "from": {"data": "node-data"},
+          "clip": true,
           "on": [
             {
               "trigger": "fix",
@@ -980,6 +354,7 @@
         },
         {
           "type": "path",
+          "clip": true,
           "from": {"data": "link-data"},
           "interactive": false,
           "encode": {
@@ -1002,6 +377,7 @@
         },
         {
           "type": "text",
+          "clip": true,
           "from": {"data": "nodes"},
           "encode": {
             "update": {
