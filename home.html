@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <title>WHW Data Visualization Project</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.19.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.15.1"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+
+  <style>
+
+.axis path,
+.axis line {
+fill: none;
+stroke: #000;
+shape-rendering: crispEdges;
+}
+
+.bar {
+fill: steelblue;
+}
+
+.x.axis path {
+display: none;
+}
+
+.tooltip{
+text-anchor: middle;
+font-family: sans-serif;
+font-size: 10px;
+font-weight: bold;
+fill:black; 
+}
+
+</style>
+</head>
+
+<body>
+
+  <div style="text-align: center;">
+
+  <div style="margin: 0 auto">
+    <h1>Using D3 for stacked chart</h1>
+    <label><input type="checkbox"> Sort values</label>
+    <svg id="stacked_plot" width="200" height="10"></svg>
+    <script src="d3_project.js"></script>
+  </div>
+</div>
+
+
+<div style="text-align: center;">
+
+  <div id="description" style="margin: 0 auto; width: 30%; text-align: left; ">
+    <h1>Abbreviations of Trust Features</h1>
+    <ul>
+      <li><b>trstprl:</b> Trust in country's parliament</li>
+      <li><b>trstlgl:</b> Trust in the legal system</li>
+      <li><b>trstplc:</b> Trust in the police</li>
+      <li><b>trstplt:</b> Trust in politicians</li>
+      <li><b>trstprt:</b> Trust in political parties</li>
+      <li><b>trstep:</b> Trust in the European Parliament</li>
+      <li><b>trstun:</b> Trust in the United Nations</li>
+    </ul> 
+  </div>
+</div>
+
+  <div style="text-align: center;">
+  <div id="vis"  style="margin: 0 auto">
+  </div>
+  </div>
+ 
+  <script type="text/javascript">
+    var yourVlSpec = {
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
+  "width": 1200,
+  "height": 600,
+  "padding": 10,
+  "signals": [
+    {
+      "name": "active",
+      "value": "null",
+      "on": [
+        {"events": "text:mouseover", "update": "datum.index"},
+        {"events": "mouseover[!event.item]", "update": "null"}
+      ]
+    },
+    {"name": "cx", "update": "width / 2"},
+    {"name": "cy", "update": "height / 2"},
+    {
+      "name": "nodeRadius",
+      "value": 8,
+      "bind": {"input": "range", "min": 1, "max": 50, "step": 1}
+    },
+    {
+      "name": "nodeCharge",
+      "value": 80,
+      "bind": {"input": "range", "min": -100, "max": 100, "step": 1}
+    },
+    {
+      "name": "linkDistance",
+      "value": 30,
+      "bind": {"input": "range", "min": 5, "max": 300, "step": 1}
+    },
+    {"name": "static", "value": true, "bind": {"input": "checkbox"}},
+    {
+      "description": "State variable for active node fix status.",
+      "name": "fix",
+      "value": false,
+      "on": [
+        {
+          "events": "symbol:mouseout[!event.buttons], window:mouseup",
+          "update": "false"
+        },
+        {"events": "symbol:mouseover", "update": "fix || true"},
+        {
+          "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
+          "update": "xy()",
+          "force": true
+        }
+      ]
+    },
+    {
+      "description": "Graph node most recently interacted with.",
+      "name": "node",
+      "value": null,
+      "on": [
+        {"events": "symbol:mouseover", "update": "fix === true ? item() : node"}
+      ]
+    },
+    {
+      "description": "Flag to restart Force simulation upon data changes.",
+      "name": "restart",
+      "value": false,
+      "on": [{"events": {"signal": "fix"}, "update": "fix && fix.length"}]
+    },
+    {"name": "radius", "update": "width / 2"},
+  ],
+  "data": [
+    {
+      "name": "edges",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/arc_plot_trst_vs_happiness.json",
+      "format": {"type": "json", "property": "links"}
+    },
+    {
+      "name": "sourceDegree",
+      "source": "edges",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["source"],
+          "fields": ["value"],
+          "ops": ["sum"]
+        }
+      ]
+    },
+    {
+      "name": "targetDegree",
+      "source": "edges",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["target"],
+          "fields": ["value"],
+          "ops": ["sum"]
+        }
+      ]
+    },
+    {
+      "name": "nodes",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/arc_plot_trst_vs_happiness.json",
+      "format": {"type": "json", "property": "nodes"},
+      "transform": [
+        {"type": "window", "ops": ["rank"], "as": ["order"]},
+        {
+          "type": "lookup",
+          "from": "sourceDegree",
+          "key": "source",
+          "fields": ["index"],
+          "as": ["sourceDegree"],
+          "default": {"count": 0}
+        },
+        {
+          "type": "lookup",
+          "from": "targetDegree",
+          "key": "target",
+          "fields": ["index"],
+          "as": ["targetDegree"],
+          "default": {"count": 0}
+        },
+        {
+          "type": "formula",
+          "as": "sourceScore",
+          "expr": "datum.sourceDegree.sum_value"
+        },
+        {
+          "type": "formula",
+          "as": "targetScore",
+          "expr": "datum.targetDegree.sum_value * 0.5"
+        }
+      ]
+    },
+    {
+      "name": "node-data",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/network_plot_trst_to_only_trstprl.json",
+      "format": {"type": "json", "property": "nodes"}
+    },
+    {
+      "name": "link-data",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/network_plot_trst_to_only_trstprl.json",
+      "format": {"type": "json", "property": "links"}
+    }
+  ],
+  "scales": [
+    {
+      "name": "position",
+      "type": "band",
+      "domain": {"data": "nodes", "field": "order", "sort": true},
+      "range": "width"
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "range": "category",
+      "domain": {"data": "nodes", "field": "group"}
+    },
+    {
+      "name": "color-network",
+      "type": "ordinal",
+      "domain": {"data": "node-data", "field": "group"},
+      "range": {"scheme": "category20c"}
+    }
+  ],
+  "layout": {"padding": 200, "bounds": "flush", "align": "none", "columns": 1},
+  "marks": [
+    {
+      "type": "group",
+      "style": "cell",
+      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 400}}},
+      "title": {
+        "text": "Arc Plot",
+        "frame": "group",
+        "fontSize": {"value": 20}
+      },
+      "marks": [
+        {
+          "type": "symbol",
+          "name": "layout",
+          "interactive": false,
+          "from": {"data": "nodes"},
+          "encode": {
+            "enter": {"opacity": {"value": 0}},
+            "update": {
+              "x": {"scale": "position", "field": "order"},
+              "y": {"value": 400},
+              "size": [
+                {"test": "datum.group === 4", "field": "targetScore"},
+                {"field": "sourceScore", "mult": 5, "offset": 0}
+              ],
+              "fill": {"scale": "color", "field": "group"}
+            }
+          }
+        },
+        {
+          "type": "path",
+          "from": {"data": "edges"},
+          "encode": {
+            "enter": {
+              "stroke": {"value": "#000"},
+              "strokeOpacity": {"value": 0.2},
+              "strokeWidth": {"field": "value"}
+            },
+            "update": {
+              "stroke": [
+                {"test": "datum.source === active", "value": "red"},
+                {"value": "steelblue"}
+              ],
+              "zindex": [
+                {"test": "datum.source === active", "value": 2},
+                {"value": 1}
+              ]
+            }
+          },
+          "transform": [
+            {
+              "type": "lookup",
+              "from": "layout",
+              "key": "datum.index",
+              "fields": ["datum.source", "datum.target"],
+              "as": ["sourceNode", "targetNode"]
+            },
+            {
+              "type": "linkpath",
+              "sourceX": {
+                "expr": "min(datum.sourceNode.x, datum.targetNode.x)"
+              },
+              "targetX": {
+                "expr": "max(datum.sourceNode.x, datum.targetNode.x)"
+              },
+              "sourceY": {"expr": "400"},
+              "targetY": {"expr": "400"},
+              "shape": "arc"
+            }
+          ]
+        },
+        {
+          "type": "symbol",
+          "from": {"data": "layout"},
+          "encode": {
+            "enter": {
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "fill": {"field": "fill"},
+              "size": {"field": "size"}
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {"data": "nodes"},
+          "encode": {
+            "enter": {
+              "x": {"scale": "position", "field": "order"},
+              "y": {"value": 415},
+              "fontSize": {"value": 20},
+              "align": {"value": "right"},
+              "baseline": {"value": "middle"},
+              "angle": {"value": -90},
+              "text": {"field": "name"}
+            },
+            "update": {"fontSize": {"value": 15}}
+          }
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "style": "cell",
+      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 600}}},
+      "title": {
+        "text": "Network plot",
+        "frame": "group",
+        "fontSize": {"value": 20}
+      },
+      "marks": [
+        {
+          "name": "nodes",
+          "type": "symbol",
+          "zindex": 1,
+          "from": {"data": "node-data"},
+          "clip": true,
+          "on": [
+            {
+              "trigger": "fix",
+              "modify": "node",
+              "values": "fix === true ? {fx: node.x, fy: node.y} : {fx: fix[0], fy: fix[1]}"
+            },
+            {
+              "trigger": "!fix",
+              "modify": "node",
+              "values": "{fx: null, fy: null}"
+            }
+          ],
+          "encode": {
+            "enter": {
+              "fill": {"scale": "color-network", "field": "group"},
+              "stroke": {"value": "white"}
+            },
+            "update": {
+              "size": {"signal": "2 * nodeRadius * nodeRadius"},
+              "cursor": {"value": "pointer"}
+            }
+          },
+          "transform": [
+            {
+              "type": "force",
+              "iterations": 300,
+              "restart": {"signal": "restart"},
+              "static": {"signal": "static"},
+              "signal": "force",
+              "forces": [
+                {
+                  "force": "center",
+                  "x": {"signal": "cx"},
+                  "y": {"signal": "cy"}
+                },
+                {"force": "collide", "radius": {"signal": "nodeRadius"}},
+                {"force": "nbody", "strength": {"signal": "nodeCharge"}},
+                {
+                  "force": "link",
+                  "links": "link-data",
+                  "distance": {"signal": "linkDistance"}
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "path",
+          "clip": true,
+          "from": {"data": "link-data"},
+          "interactive": false,
+          "encode": {
+            "update": {
+              "stroke": {"value": "#ccc"},
+              "strokeWidth": {"value": 0.5}
+            }
+          },
+          "transform": [
+            {
+              "type": "linkpath",
+              "require": {"signal": "force"},
+              "shape": "line",
+              "sourceX": "datum.source.x",
+              "sourceY": "datum.source.y",
+              "targetX": "datum.target.x",
+              "targetY": "datum.target.y"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "clip": true,
+          "from": {"data": "nodes"},
+          "encode": {
+            "update": {
+              "x": {"field": "x", "offset": 4},
+              "y": {"field": "y"},
+              "text": {"field": "datum.name"},
+              "fontSize": {"value": 10}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
+
+    vegaEmbed('#vis', yourVlSpec);
+
+    var view = new vega.View(vega.parse(yourVlSpec));
+    view.runAsync(); // evaluate and render the view
+
+  </script>
+
+<div style="text-align: center;">
+<div id="radarChart" style="margin: 0 auto">
+</div>
+</div>
+<script type="text/javascript">
+  var yourVlSpec = {
+
+"$schema": "https://vega.github.io/schema/vega/v5.json",
+
+"description": "A radar chart example, showing multiple dimensions in a radial layout.",
+
+"width": 600,
+
+"height": 600,
+
+"padding": 100,
+
+"autosize": {"type": "none", "contains": "padding"},
+
+"signals": [
+
+  {"name": "radius", "update": "width / 2"},
+
+  {
+
+    "name": "country1",
+
+    "bind": {"input": "select", "options": ["Albania","Belgium","Bulgaria","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Hungary","Iceland","Ireland","Israel","Italy","Kosovo","Lithuania","Netherlands","Norway","Poland","Portugal","Russian Federation","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom"]},
+
+    "value": "Italy"
+
+  },
+
+  {
+
+    "name": "country2",
+
+    "bind": {"input": "select", "options": ["Albania","Belgium","Bulgaria","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Hungary","Iceland","Ireland","Israel","Italy","Kosovo","Lithuania","Netherlands","Norway","Poland","Portugal","Russian Federation","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom"]},
+
+    "value": "Belgium"
+
+  }
+
+],
+
+"data": [
+
+  {
+
+    "name": "table",
+
+    "url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/df_radar_wellbeing_full.csv",
+
+    "format": {"type": "csv", "parse": "auto"}
+
+  },
+
+  {
+
+    "name": "wbs",
+
+    "source": "table",
+
+    "transform": [{"type": "aggregate", "groupby": ["wellbeing"]}]
+
+  },
+
+  {
+
+    "name": "table_filter",
+
+    "source": "table",
+
+    "transform": [
+
+      {
+
+        "type": "filter",
+
+        "expr": "datum.states === country1 || datum.states === country2"
+
+      }
+
+    ]}
+
+],
+
+"scales": [
+
+  {
+
+    "name": "angular",
+
+    "type": "point",
+
+    "range": {"signal": "[-PI, PI]"},
+
+    "padding": 0.5,
+
+    "domain": {"data": "table", "field": "wellbeing"}
+
+  },
+
+  {
+
+    "name": "radial",
+
+    "type": "linear",
+
+    "range": {"signal": "[0, radius]"},
+
+    "zero": true,
+
+    "nice": false,
+
+    "domain": {"data": "table", "field": "value"},
+
+    "domainMin": 0
+
+  },
+
+  {
+
+    "name": "color",
+
+    "type": "ordinal",
+
+    "domain": {"data": "table", "field": "states"},
+
+    "range": {"scheme": "category10"}
+
+  }
+
+],
+
+"encode": {"enter": {"x": {"signal": "radius"}, "y": {"signal": "radius"}}},
+
+"marks": [
+
+  {
+
+    "type": "group",
+
+    "name": "categories",
+
+    "zindex": 1,
+
+    "from": {
+
+      "facet": {"data": "table_filter", "name": "facet", "groupby": ["states"]}
+
+    },
+
+    "marks": [
+
+      {
+
+        "type": "line",
+
+        "name": "states-line",
+
+        "from": {"data": "facet"},
+
+        "encode": {
+
+          "enter": {
+
+            "interpolate": {"value": "linear-closed"},
+
+            "x": {
+
+              "signal": "scale('radial', datum.value) * cos(scale('angular', datum.wellbeing))"
+
+            },
+
+            "y": {
+
+              "signal": "scale('radial', datum.value) * sin(scale('angular', datum.wellbeing))"
+
+            },
+
+            "stroke": {"scale": "color", "field": "states"},
+
+            "strokeWidth": {"value": 1},
+
+            "fill": {"scale": "color", "field": "states"},
+
+            "fillOpacity": {"value": 0.1}
+
+          }
+
+        }
+
+      },
+
+      {
+
+        "type": "text",
+
+        "name": "value-text",
+
+        "from": {"data": "states-line"},
+
+        "encode": {
+
+          "enter": {
+
+            "x": {"signal": "datum.x"},
+
+            "y": {"signal": "datum.y"},
+
+            "text": {"signal": "datum.datum.value"},
+
+            "align": {"value": "center"},
+
+            "baseline": {"value": "middle"},
+
+            "fill": {"value": "black"}
+
+          }
+
+        }
+
+      }
+
+    ]
+
+  },
+
+  {
+
+    "type": "rule",
+
+    "name": "radial-grid",
+
+    "from": {"data": "wbs"},
+
+    "zindex": 0,
+
+    "encode": {
+
+      "enter": {
+
+        "x": {"value": 0},
+
+        "y": {"value": 0},
+
+        "x2": {"signal": "radius * cos(scale('angular', datum.wellbeing))"},
+
+        "y2": {"signal": "radius * sin(scale('angular', datum.wellbeing))"},
+
+        "stroke": {"value": "lightgray"},
+
+        "strokeWidth": {"value": 1}
+
+      }
+
+    }
+
+  },
+
+  {
+
+    "type": "text",
+
+    "name": "wellbeing-label",
+
+    "from": {"data": "wbs"},
+
+    "zindex": 1,
+
+    "encode": {
+
+      "enter": {
+
+        "x": {
+
+          "signal": "(radius + 5) * cos(scale('angular', datum.wellbeing))"
+
+        },
+
+        "y": {
+
+          "signal": "(radius + 5) * sin(scale('angular', datum.wellbeing))"
+
+        },
+
+        "text": {"field": "wellbeing"},
+
+        "align": [
+
+          {
+
+            "test": "abs(scale('angular', datum.wellbeing)) > PI / 2",
+
+            "value": "right"
+
+          },
+
+          {"value": "left"}
+
+        ],
+
+        "baseline": [
+
+          {"test": "scale('angular', datum.wellbeing) > 0", "value": "top"},
+
+          {
+
+            "test": "scale('angular', datum.wellbeing) == 0",
+
+            "value": "middle"
+
+          },
+
+          {"value": "bottom"}
+
+        ],
+
+        "fill": {"value": "black"},
+
+        "fontWeight": {"value": "bold"}
+
+      }
+
+    }
+
+  },
+
+  {
+
+    "type": "line",
+
+    "name": "outer-line",
+
+    "from": {"data": "radial-grid"},
+
+    "encode": {
+
+      "enter": {
+
+        "interpolate": {"value": "linear-closed"},
+
+        "x": {"field": "x2"},
+
+        "y": {"field": "y2"},
+
+        "stroke": {"value": "lightgray"},
+
+        "strokeWidth": {"value": 1}
+
+      }
+
+    }
+
+  }
+
+]
+
+}
+
+  vegaEmbed('#radarChart', yourVlSpec);
+
+  var view = new vega.View(vega.parse(yourVlSpec));
+  view.runAsync(); // evaluate and render the view
+
+</script>
+
+<div style="height: 200px; width: 300px;">
+ <h1>    </h1>
+</div>
+
+</body>
+
+</html>
