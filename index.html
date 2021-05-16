@@ -9,12 +9,21 @@
   <script src="https://cdn.jsdelivr.net/npm/vega@5.19.1"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.15.1"></script>
-
+  <script src="https://d3js.org/d3.v3.min.js"></script>
 </head>
 
 <body>
+  <div>
+    <h1>Using D3 for stacked chart</h1>
+    <label><input type="checkbox"> Sort values</label>
+    <svg id="stacked_plot" width="200" height="10"></svg>
+    <script src="d3_project.js"></script>
+  </div>
+  
+
+
   <div id="description">
-    <h2>Abbreviations of Trust Features</h2>
+    <h1>Abbreviations of Trust Features</h1>
     <ul>
       <li><b>trstprl:</b> Trust in country's parliament</li>
       <li><b>trstlgl:</b> Trust in the legal system</li>
@@ -25,6 +34,8 @@
       <li><b>trstun:</b> Trust in the United Nations</li>
     </ul> 
   </div>
+
+
   <div id="vis">
   </div>
   <script type="text/javascript">
@@ -400,9 +411,6 @@
     view.runAsync(); // evaluate and render the view
 
   </script>
-
-
-
 
 
 
