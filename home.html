@@ -42,10 +42,21 @@ fill:black;
 <body>
 
   <div style="text-align: center;">
+    <h1>How well-being differs based on countries?</h1>
 
+    <div style="margin: 0 auto; width: 45%; text-align: left; ">
+      <p>The scores of countries across 6 well-being aspects can be seen from the below stacked chart. To interact with the chart:</p>
+      <li>You can select one of well-being aspect from the legend and also you can sort countries based on selected well-being aspect.
+      </li>
+      <li>You can interact with network plot by tweaking its parameters from the below sliders.
+      </li>
+    </div>
+
+    <div style="height: 50px; width: 300px;">
+      <h1>    </h1>
+     </div>
   <div style="margin: 0 auto">
-    <h1>Using D3 for stacked chart</h1>
-    <label><input type="checkbox"> Sort values</label>
+    <label><input type="checkbox"> Sort Countries</label>
     <svg id="stacked_plot" width="200" height="10"></svg>
   </div>
   <div id="d3plot" style="margin: 0 auto">
@@ -53,11 +64,401 @@ fill:black;
   </div>
 </div>
 
+<div style="height: 50px; width: 300px;">
+  <h1>    </h1>
+ </div>
+
+ <div style="text-align: center;">
+  <h2>One-to-one country comparison</h2>
+  <p>Please select which countries to compare across 6 dimensions of well-being from the below dropdown menus</p>
+
+  <div id="radarChart" style="margin: 0 auto">
+    
+  </div>
+  <script type="text/javascript">
+    var yourVlSpec = {
+  
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  
+  "description": "A radar chart example, showing multiple dimensions in a radial layout.",
+  
+  "width": 600,
+  
+  "height": 600,
+  
+  "padding": 100,
+  
+  "autosize": {"type": "none", "contains": "padding"},
+  
+  "signals": [
+  
+    {"name": "radius", "update": "width / 2"},
+  
+    {
+  
+      "name": "country1",
+  
+      "bind": {"input": "select", "options": ["Albania","Belgium","Bulgaria","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Hungary","Iceland","Ireland","Israel","Italy","Kosovo","Lithuania","Netherlands","Norway","Poland","Portugal","Russian Federation","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom"]},
+  
+      "value": "Italy"
+  
+    },
+  
+    {
+  
+      "name": "country2",
+  
+      "bind": {"input": "select", "options": ["Albania","Belgium","Bulgaria","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Hungary","Iceland","Ireland","Israel","Italy","Kosovo","Lithuania","Netherlands","Norway","Poland","Portugal","Russian Federation","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom"]},
+  
+      "value": "Belgium"
+  
+    }
+  
+  ],
+  
+  "data": [
+  
+    {
+  
+      "name": "table",
+  
+      "url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/df_radar_wellbeing_full.csv",
+  
+      "format": {"type": "csv", "parse": "auto"}
+  
+    },
+  
+    {
+  
+      "name": "wbs",
+  
+      "source": "table",
+  
+      "transform": [{"type": "aggregate", "groupby": ["wellbeing"]}]
+  
+    },
+  
+    {
+  
+      "name": "table_filter",
+  
+      "source": "table",
+  
+      "transform": [
+  
+        {
+  
+          "type": "filter",
+  
+          "expr": "datum.states === country1 || datum.states === country2"
+  
+        }
+  
+      ]}
+  
+  ],
+  
+  "scales": [
+  
+    {
+  
+      "name": "angular",
+  
+      "type": "point",
+  
+      "range": {"signal": "[-PI, PI]"},
+  
+      "padding": 0.5,
+  
+      "domain": {"data": "table", "field": "wellbeing"}
+  
+    },
+  
+    {
+  
+      "name": "radial",
+  
+      "type": "linear",
+  
+      "range": {"signal": "[0, radius]"},
+  
+      "zero": true,
+  
+      "nice": false,
+  
+      "domain": {"data": "table", "field": "value"},
+  
+      "domainMin": 0
+  
+    },
+  
+    {
+  
+      "name": "color",
+  
+      "type": "ordinal",
+  
+      "domain": {"data": "table", "field": "states"},
+  
+      "range": {"scheme": "category10"}
+  
+    }
+  
+  ],
+  
+  "encode": {"enter": {"x": {"signal": "radius"}, "y": {"signal": "radius"}}},
+  
+  "marks": [
+  
+    {
+  
+      "type": "group",
+  
+      "name": "categories",
+  
+      "zindex": 1,
+  
+      "from": {
+  
+        "facet": {"data": "table_filter", "name": "facet", "groupby": ["states"]}
+  
+      },
+  
+      "marks": [
+  
+        {
+  
+          "type": "line",
+  
+          "name": "states-line",
+  
+          "from": {"data": "facet"},
+  
+          "encode": {
+  
+            "enter": {
+  
+              "interpolate": {"value": "linear-closed"},
+  
+              "x": {
+  
+                "signal": "scale('radial', datum.value) * cos(scale('angular', datum.wellbeing))"
+  
+              },
+  
+              "y": {
+  
+                "signal": "scale('radial', datum.value) * sin(scale('angular', datum.wellbeing))"
+  
+              },
+  
+              "stroke": {"scale": "color", "field": "states"},
+  
+              "strokeWidth": {"value": 1},
+  
+              "fill": {"scale": "color", "field": "states"},
+  
+              "fillOpacity": {"value": 0.1}
+  
+            }
+  
+          }
+  
+        },
+  
+        {
+  
+          "type": "text",
+  
+          "name": "value-text",
+  
+          "from": {"data": "states-line"},
+  
+          "encode": {
+  
+            "enter": {
+  
+              "x": {"signal": "datum.x"},
+  
+              "y": {"signal": "datum.y"},
+  
+              "text": {"signal": "datum.datum.value"},
+  
+              "align": {"value": "center"},
+  
+              "baseline": {"value": "middle"},
+  
+              "fill": {"value": "black"}
+  
+            }
+  
+          }
+  
+        }
+  
+      ]
+  
+    },
+  
+    {
+  
+      "type": "rule",
+  
+      "name": "radial-grid",
+  
+      "from": {"data": "wbs"},
+  
+      "zindex": 0,
+  
+      "encode": {
+  
+        "enter": {
+  
+          "x": {"value": 0},
+  
+          "y": {"value": 0},
+  
+          "x2": {"signal": "radius * cos(scale('angular', datum.wellbeing))"},
+  
+          "y2": {"signal": "radius * sin(scale('angular', datum.wellbeing))"},
+  
+          "stroke": {"value": "lightgray"},
+  
+          "strokeWidth": {"value": 1}
+  
+        }
+  
+      }
+  
+    },
+  
+    {
+  
+      "type": "text",
+  
+      "name": "wellbeing-label",
+  
+      "from": {"data": "wbs"},
+  
+      "zindex": 1,
+  
+      "encode": {
+  
+        "enter": {
+  
+          "x": {
+  
+            "signal": "(radius + 5) * cos(scale('angular', datum.wellbeing))"
+  
+          },
+  
+          "y": {
+  
+            "signal": "(radius + 5) * sin(scale('angular', datum.wellbeing))"
+  
+          },
+  
+          "text": {"field": "wellbeing"},
+  
+          "align": [
+  
+            {
+  
+              "test": "abs(scale('angular', datum.wellbeing)) > PI / 2",
+  
+              "value": "right"
+  
+            },
+  
+            {"value": "left"}
+  
+          ],
+  
+          "baseline": [
+  
+            {"test": "scale('angular', datum.wellbeing) > 0", "value": "top"},
+  
+            {
+  
+              "test": "scale('angular', datum.wellbeing) == 0",
+  
+              "value": "middle"
+  
+            },
+  
+            {"value": "bottom"}
+  
+          ],
+  
+          "fill": {"value": "black"},
+  
+          "fontWeight": {"value": "bold"}
+  
+        }
+  
+      }
+  
+    },
+  
+    {
+  
+      "type": "line",
+  
+      "name": "outer-line",
+  
+      "from": {"data": "radial-grid"},
+  
+      "encode": {
+  
+        "enter": {
+  
+          "interpolate": {"value": "linear-closed"},
+  
+          "x": {"field": "x2"},
+  
+          "y": {"field": "y2"},
+  
+          "stroke": {"value": "lightgray"},
+  
+          "strokeWidth": {"value": 1}
+  
+        }
+  
+      }
+  
+    }
+  
+  ]
+  
+  }
+  
+    vegaEmbed('#radarChart', yourVlSpec);
+  
+    var view = new vega.View(vega.parse(yourVlSpec));
+    view.runAsync(); // evaluate and render the view
+  
+  </script>
+  </div>
+
+  
+  <div style="height: 50px; width: 300px;">
+    <h1>    </h1>
+   </div>
 
 <div style="text-align: center;">
+  <div style="margin: 0 auto; width: 45%; text-align: left; ">
+    <h1>What is the correlation between trust and Happiness?</h1>
+    <p>The correlataion between trust and happiness is visualized with an arc plot and a network plot. 
+      <li>You can hover over the text of a specific level of a certain trust aspect to see its happiness distribution from the arc plot.
+      </li>
+      <li>You can interact with network plot by tweaking its parameters from the below sliders.
+      </li>
+    </p>
+
+  </div>
 
   <div id="description" style="margin: 0 auto; width: 30%; text-align: left; ">
-    <h1>Abbreviations of Trust Features</h1>
+    <h2>Abbreviations of Trust Features</h2>
     <ul>
       <li><b>trstprl:</b> Trust in country's parliament</li>
       <li><b>trstlgl:</b> Trust in the legal system</li>
@@ -78,7 +479,6 @@ fill:black;
   <script type="text/javascript">
     var yourVlSpec = {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
   "width": 1200,
   "height": 600,
   "padding": 10,
@@ -95,17 +495,17 @@ fill:black;
     {"name": "cy", "update": "height / 2"},
     {
       "name": "nodeRadius",
-      "value": 8,
-      "bind": {"input": "range", "min": 1, "max": 50, "step": 1}
+      "value": 10,
+      "bind": {"input": "range", "min": 1, "max": 20, "step": 1}
     },
     {
       "name": "nodeCharge",
-      "value": 80,
-      "bind": {"input": "range", "min": -100, "max": 100, "step": 1}
+      "value": -120,
+      "bind": {"input": "range", "min": -150, "max": 0, "step": 1}
     },
     {
       "name": "linkDistance",
-      "value": 30,
+      "value": 140,
       "bind": {"input": "range", "min": 5, "max": 300, "step": 1}
     },
     {"name": "static", "value": true, "bind": {"input": "checkbox"}},
@@ -208,12 +608,12 @@ fill:black;
     },
     {
       "name": "node-data",
-      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/network_plot_trst_to_only_trstprl.json",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/network_plot_undirected_dataset.json",
       "format": {"type": "json", "property": "nodes"}
     },
     {
       "name": "link-data",
-      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/network_plot_trst_to_only_trstprl.json",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/network_plot_undirected_dataset.json",
       "format": {"type": "json", "property": "links"}
     }
   ],
@@ -342,7 +742,7 @@ fill:black;
     {
       "type": "group",
       "style": "cell",
-      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 600}}},
+      "encode": {"enter": {"width": {"value": 1200}, "height": {"value": 800}}},
       "title": {
         "text": "Network plot",
         "frame": "group",
@@ -388,7 +788,7 @@ fill:black;
                 {
                   "force": "center",
                   "x": {"signal": "cx"},
-                  "y": {"signal": "cy"}
+                  "y": {"signal": "cy + 50"}
                 },
                 {"force": "collide", "radius": {"signal": "nodeRadius"}},
                 {"force": "nbody", "strength": {"signal": "nodeCharge"}},
@@ -450,375 +850,8 @@ fill:black;
 
   </script>
 
-<div style="text-align: center;">
-<div id="radarChart" style="margin: 0 auto">
-</div>
-</div>
-<script type="text/javascript">
-  var yourVlSpec = {
 
-"$schema": "https://vega.github.io/schema/vega/v5.json",
-
-"description": "A radar chart example, showing multiple dimensions in a radial layout.",
-
-"width": 600,
-
-"height": 600,
-
-"padding": 100,
-
-"autosize": {"type": "none", "contains": "padding"},
-
-"signals": [
-
-  {"name": "radius", "update": "width / 2"},
-
-  {
-
-    "name": "country1",
-
-    "bind": {"input": "select", "options": ["Albania","Belgium","Bulgaria","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Hungary","Iceland","Ireland","Israel","Italy","Kosovo","Lithuania","Netherlands","Norway","Poland","Portugal","Russian Federation","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom"]},
-
-    "value": "Italy"
-
-  },
-
-  {
-
-    "name": "country2",
-
-    "bind": {"input": "select", "options": ["Albania","Belgium","Bulgaria","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Hungary","Iceland","Ireland","Israel","Italy","Kosovo","Lithuania","Netherlands","Norway","Poland","Portugal","Russian Federation","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom"]},
-
-    "value": "Belgium"
-
-  }
-
-],
-
-"data": [
-
-  {
-
-    "name": "table",
-
-    "url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/df_radar_wellbeing_full.csv",
-
-    "format": {"type": "csv", "parse": "auto"}
-
-  },
-
-  {
-
-    "name": "wbs",
-
-    "source": "table",
-
-    "transform": [{"type": "aggregate", "groupby": ["wellbeing"]}]
-
-  },
-
-  {
-
-    "name": "table_filter",
-
-    "source": "table",
-
-    "transform": [
-
-      {
-
-        "type": "filter",
-
-        "expr": "datum.states === country1 || datum.states === country2"
-
-      }
-
-    ]}
-
-],
-
-"scales": [
-
-  {
-
-    "name": "angular",
-
-    "type": "point",
-
-    "range": {"signal": "[-PI, PI]"},
-
-    "padding": 0.5,
-
-    "domain": {"data": "table", "field": "wellbeing"}
-
-  },
-
-  {
-
-    "name": "radial",
-
-    "type": "linear",
-
-    "range": {"signal": "[0, radius]"},
-
-    "zero": true,
-
-    "nice": false,
-
-    "domain": {"data": "table", "field": "value"},
-
-    "domainMin": 0
-
-  },
-
-  {
-
-    "name": "color",
-
-    "type": "ordinal",
-
-    "domain": {"data": "table", "field": "states"},
-
-    "range": {"scheme": "category10"}
-
-  }
-
-],
-
-"encode": {"enter": {"x": {"signal": "radius"}, "y": {"signal": "radius"}}},
-
-"marks": [
-
-  {
-
-    "type": "group",
-
-    "name": "categories",
-
-    "zindex": 1,
-
-    "from": {
-
-      "facet": {"data": "table_filter", "name": "facet", "groupby": ["states"]}
-
-    },
-
-    "marks": [
-
-      {
-
-        "type": "line",
-
-        "name": "states-line",
-
-        "from": {"data": "facet"},
-
-        "encode": {
-
-          "enter": {
-
-            "interpolate": {"value": "linear-closed"},
-
-            "x": {
-
-              "signal": "scale('radial', datum.value) * cos(scale('angular', datum.wellbeing))"
-
-            },
-
-            "y": {
-
-              "signal": "scale('radial', datum.value) * sin(scale('angular', datum.wellbeing))"
-
-            },
-
-            "stroke": {"scale": "color", "field": "states"},
-
-            "strokeWidth": {"value": 1},
-
-            "fill": {"scale": "color", "field": "states"},
-
-            "fillOpacity": {"value": 0.1}
-
-          }
-
-        }
-
-      },
-
-      {
-
-        "type": "text",
-
-        "name": "value-text",
-
-        "from": {"data": "states-line"},
-
-        "encode": {
-
-          "enter": {
-
-            "x": {"signal": "datum.x"},
-
-            "y": {"signal": "datum.y"},
-
-            "text": {"signal": "datum.datum.value"},
-
-            "align": {"value": "center"},
-
-            "baseline": {"value": "middle"},
-
-            "fill": {"value": "black"}
-
-          }
-
-        }
-
-      }
-
-    ]
-
-  },
-
-  {
-
-    "type": "rule",
-
-    "name": "radial-grid",
-
-    "from": {"data": "wbs"},
-
-    "zindex": 0,
-
-    "encode": {
-
-      "enter": {
-
-        "x": {"value": 0},
-
-        "y": {"value": 0},
-
-        "x2": {"signal": "radius * cos(scale('angular', datum.wellbeing))"},
-
-        "y2": {"signal": "radius * sin(scale('angular', datum.wellbeing))"},
-
-        "stroke": {"value": "lightgray"},
-
-        "strokeWidth": {"value": 1}
-
-      }
-
-    }
-
-  },
-
-  {
-
-    "type": "text",
-
-    "name": "wellbeing-label",
-
-    "from": {"data": "wbs"},
-
-    "zindex": 1,
-
-    "encode": {
-
-      "enter": {
-
-        "x": {
-
-          "signal": "(radius + 5) * cos(scale('angular', datum.wellbeing))"
-
-        },
-
-        "y": {
-
-          "signal": "(radius + 5) * sin(scale('angular', datum.wellbeing))"
-
-        },
-
-        "text": {"field": "wellbeing"},
-
-        "align": [
-
-          {
-
-            "test": "abs(scale('angular', datum.wellbeing)) > PI / 2",
-
-            "value": "right"
-
-          },
-
-          {"value": "left"}
-
-        ],
-
-        "baseline": [
-
-          {"test": "scale('angular', datum.wellbeing) > 0", "value": "top"},
-
-          {
-
-            "test": "scale('angular', datum.wellbeing) == 0",
-
-            "value": "middle"
-
-          },
-
-          {"value": "bottom"}
-
-        ],
-
-        "fill": {"value": "black"},
-
-        "fontWeight": {"value": "bold"}
-
-      }
-
-    }
-
-  },
-
-  {
-
-    "type": "line",
-
-    "name": "outer-line",
-
-    "from": {"data": "radial-grid"},
-
-    "encode": {
-
-      "enter": {
-
-        "interpolate": {"value": "linear-closed"},
-
-        "x": {"field": "x2"},
-
-        "y": {"field": "y2"},
-
-        "stroke": {"value": "lightgray"},
-
-        "strokeWidth": {"value": 1}
-
-      }
-
-    }
-
-  }
-
-]
-
-}
-
-  vegaEmbed('#radarChart', yourVlSpec);
-
-  var view = new vega.View(vega.parse(yourVlSpec));
-  view.runAsync(); // evaluate and render the view
-
-</script>
-
-<div style="height: 200px; width: 300px;">
+<div style="height: 50px; width: 300px;">
  <h1>    </h1>
 </div>
 
