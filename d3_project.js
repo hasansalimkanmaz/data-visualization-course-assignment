@@ -8,7 +8,7 @@ var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
 
 var y = d3.scale.linear()
-    .rangeRound([height, 0]);
+    .rangeRound([height, margin.top]);
 
 var color = d3.scale.ordinal()
     .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
@@ -50,20 +50,19 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
   data.forEach(function(d) {
     var mystate = d.State; //add to stock code
     var y0 = 0;
-    //d.ages = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
-    d.ages = color.domain().map(function(name) {
+    //d.ag = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+    d.ag = color.domain().map(function(name) {
       //return { mystate:mystate, name: name, y0: y0, y1: y0 += +d[name]}; });
-      return { 
+      const out = { 
         mystate:mystate, 
         name: name, 
         y0: y0, 
         y1: y0 += +d[name], 
-        value: d[name],
-        y_corrected: 0
+        value: +d[name],
       }; 
-      });
-    d.total = d.ages[d.ages.length - 1].y1;    
-
+      return out
+    });
+    d.total = d.ag[d.ag.length - 1].y1;    
   });
 
   //Sort totals in descending order
@@ -97,26 +96,18 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
    height_diff = 0;  //height discrepancy when calculating h based on data vs y(d.y0) - y(d.y1)
    state.selectAll("rect")
       .data(function(d) {
-        return d.ages; 
+        return d.ag; 
       })
     .enter().append("rect")
       .attr("width", x.rangeBand())
       .attr("y", function(d) {
-        height_diff = height_diff + y(d.y0) - y(d.y1) - (y(0) - y(d.value));
-        y_corrected = y(d.y1) + height_diff;
-        d.y_corrected = y_corrected //store in d for later use in restorePlot()
-
-        if (d.name === "65 Years and Over") height_diff = 0; //reset for next d.mystate
-          
-        return y_corrected;    
-        // return y(d.y1);  //orig, but not accurate  
+        return y(d.y1);
       })
       .attr("x",function(d) { //add to stock code
           return x(d.mystate)
         })
       .attr("height", function(d) {       
-        //return y(d.y0) - y(d.y1); //heights calculated based on stacked values (inaccurate)
-        return y(0) - y(d.value); //calculate height directly from value in csv file
+        return y(d.y0) - y(d.y1);
       })
       .attr("class", function(d) {        
         classLabel = d.name.replace(/\s/g, ''); //remove spaces
@@ -143,9 +134,8 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
        })
        .on("mouseout",function(){
           svg.select(".tooltip").remove();
-          d3.select(this).attr("stroke","pink").attr("stroke-width",0.2);
-                                
-        })
+          d3.select(this).attr("stroke","pink").attr("stroke-width",0.2);                
+        });
 
 
   var legend = svg.selectAll(".legend")
@@ -198,7 +188,9 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
             }
 
             //enable sort checkbox
-            d3.select("label").select("input").property("disabled", false)
+            d3.select("label")
+              .select("input")
+              .property("disabled", false)
             d3.select("label").style("color", "black")
             //sort the bars if checkbox is clicked            
             d3.select("input").on("change", change);  
@@ -228,7 +220,7 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
 
 
             //sort bars back to original positions if necessary
-            change();            
+              change();            
 
             //y translate selected category bars back to original y posn
             restorePlot(d);
@@ -253,9 +245,9 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
     //restore graph after a single selection
     d3.selectAll(".bars:not(.class" + class_keep + ")")
           .transition()
-          .duration(1000)
+          .duration(750)
           .delay(function() {
-            if (restoreXFlag) return 3000;
+            if (restoreXFlag) return 2000;
             else return 750;
           })
           .attr("width", x.rangeBand()) //restore bar width
@@ -263,21 +255,19 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
 
     //translate bars back up to original y-posn
     d3.selectAll(".class" + class_keep)
-      .attr("x", function(d) { return x(d.mystate); })
+      // .attr("x", function(d) { return x(d.mystate); })
       .transition()
       .duration(1000)
       .delay(function () {
-        if (restoreXFlag) return 2000; //bars have to be restored to orig posn
+        if (restoreXFlag) return 1000; //bars have to be restored to orig posn
         else return 0;
       })
       .attr("y", function(d) {
-        //return y(d.y1); //not exactly correct since not based on raw data value
-        return d.y_corrected; 
+        return y(d.y1); 
       });
 
     //reset
     restoreXFlag = false;
-    
   }
 
   // plot only a single legend selection
@@ -313,9 +303,7 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
         .duration(1000)
         .delay(750)
         .attr("y", y_new);
-
     })
-   
   }
 
   //adapted change() fn in http://bl.ocks.org/mbostock/3885705
@@ -326,38 +314,28 @@ d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_
 
     colName = legendClassArray_orig[sortBy];
 
-    var x0 = x.domain(data.sort(sortDescending
+    x.domain(data.sort(sortDescending
         ? function(a, b) { return b[colName] - a[colName]; }
         : function(a, b) { return b.total - a.total; })
-        .map(function(d,i) { return d.State; }))
-        .copy();
+        .map(function(d,i) { return d.State; }));
 
-    state.selectAll(".class" + active_link)
-         .sort(function(a, b) { 
-            return x0(a.mystate) - x0(b.mystate); 
-          });
-
-    var transition = svg.transition().duration(750),
-        delay = function(d, i) { return i * 20; };
+    
+    var delay = function(d, i) { return i * 20; };
 
     //sort bars
-    transition.selectAll(".class" + active_link)
+    state.selectAll("rect")
+      .transition()
+      .duration(750)
       .delay(delay)
       .attr("x", function(d) {      
-        return x0(d.mystate); 
+        return x(d.mystate); 
       });      
-
+    
     //sort x-labels accordingly    
-    transition.select(".x.axis")
-        .call(xAxis)
-        .selectAll("g")
-        .delay(delay);
-
-   
-    transition.select(".x.axis")
-        .call(xAxis)
-      .selectAll("g")
-        .delay(delay);    
+    svg.select(".x.axis")
+        .transition()
+        .duration(750)
+        .delay(delay)
+          .call(xAxis);
   }
-
 });
