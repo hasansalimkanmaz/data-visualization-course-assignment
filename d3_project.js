@@ -42,7 +42,7 @@ d3.select("label")
   .property("disabled", true)
   .property("checked", false); 
 
-d3.csv("https://raw.githubusercontent.com/NinhLouis/ESSRound6/main/wellbeing_by_country_2.csv", function(error, data) {
+d3.csv("https://raw.githubusercontent.com/hasansalimkanmaz/data-visualization-course-assignment/main/datasets/wellbeing_by_country_2.csv", function(error, data) {
   if (error) throw error;
 
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "State"; }));
