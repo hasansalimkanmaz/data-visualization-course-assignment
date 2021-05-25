@@ -44,7 +44,7 @@
 
       "name": "table",
 
-      "url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/df_radar_wellbeing_full.csv",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/data-visualization-course-assignment/main/datasets/df_radar_wellbeing_full.csv",
 
       "format": {"type": "csv", "parse": "auto"}
 
