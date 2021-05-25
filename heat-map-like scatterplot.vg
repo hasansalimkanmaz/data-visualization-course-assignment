@@ -20,7 +20,7 @@
   "data": [
     {
       "name": "table",
-      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/kul-dataviz/main/df_trstprl_happiness.csv",
+      "url": "https://raw.githubusercontent.com/hasansalimkanmaz/data-visualization-course-assignment/main/datasets/df_trstprl_happiness.csv",
       "format": {"type": "csv", "delimiter": ","}
     },
     {
