@@ -3,7 +3,7 @@
   "title": "Percentage of values by each trust aspect",
   "width": 600,
   "height": 800,
-  "data": {"url": "https://raw.githubusercontent.com/ossamum/kul-dataviz/main/trust_aspects.csv"},
+  "data": {"url": "https://raw.githubusercontent.com/hasansalimkanmaz/data-visualization-course-assignment/main/datasets/trust_aspects.csv"},
 
   "transform": [
     {
